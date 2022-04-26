@@ -1,37 +1,49 @@
 version: '3.3'
 
 services:
-  django:
-    build:
-      context: .
-    ports:
-      - "8000:8000"
+  backend:
     depends_on:
-      - db
-    restart: always
-    volumes:
-      - static:/static
-    env_file:
-      - ./.env
-    entrypoint: ./entrypoint.sh
-
-
-  nginx:
-    build: ./nginx
-    volumes:
-      - static:/static
-    ports:
-      - "80:80"
-    depends_on:
-      - django
-
-  db:
-        image: postgres:13.0-alpine
+    - django
+    - db
+  
+    django:
+      build:
+        context: .
+      ports:
+        - "8000:8000"
+      depends_on:
+        - db
+      restart: always
+      volumes:
+        - static:/static
+      env_file:
+        - ./.env
+      entrypoint: ./entrypoint.sh
+      
+      
+      db:
+        image: postgres
         restart: always
         volumes:
           - postgres_data:/var/lib/postgresql/data/
         env_file:
           - ./.env
+
+
+  nginx:
+    build:
+      dockerfile: ./nginx/Dockerfile
+ 
+    volumes:
+      - static:/static
+      - nginx.conf:/nginx/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      
+
+
 
 
 volumes:
