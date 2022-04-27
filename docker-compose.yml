@@ -1,37 +1,42 @@
 version: '3.3'
 
 services:
-  django:
-    build:
-      context: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    restart: always
-    volumes:
-      - static:/static
-    env_file:
-      - ./.env
-    entrypoint: ./entrypoint.sh
+  web:
+        build: .
+        command: gunicorn django_project.wsgi:application --bind 0.0.0.0:8000
+        expose:
+          - 8000
+        restart: always
+        volumes:
+          - static:/static
+        env_file:
+          - ./.env
+        depends_on:
+          - db
+#        entrypoint: ./entrypoint.sh
+
+#
+  db:
+          image: postgres
+          container_name: postgres
+          restart: always
+          volumes:
+            - postgres_data:/var/lib/postgresql/data/
+          env_file:
+            - ./.env
 
 
   nginx:
     build: ./nginx
     volumes:
-      - static:/static
+      - ./static:/static
     ports:
-      - "80:80"
+      - "1337:80"
     depends_on:
-      - django
+      - web
 
-  db:
-        image: postgres:13.0-alpine
-        restart: always
-        volumes:
-          - postgres_data:/var/lib/postgresql/data/
-        env_file:
-          - ./.env
+
+
 
 
 volumes:
