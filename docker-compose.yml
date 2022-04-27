@@ -25,17 +25,16 @@ services:
           env_file:
             - ./.env
 
-
   nginx:
-    build: ./nginx
+    build:
+      dockerfile: ./nginx/Dockerfile
     volumes:
-      - ./static:/static
+      - static:/static
+      - nginx.conf:/nginx/default.conf
     ports:
       - "1337:80"
     depends_on:
       - web
-
-
 
 
 
